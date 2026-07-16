@@ -1,0 +1,54 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+build/
+dist/
+coverage/
+
+# ── Vite / Node cache ─────────────────────────────────────────────────────────
+.vite/
+.vite-temp/
+*.tsbuildinfo
+
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# ── Environment variables ─────────────────────────────────────────────────────
+.env*
+!.env.example
+
+# ── OS & editor files ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+.idea/
+.vscode/
+*.suo
+*.user
+
+# ── Large generated output / debug files ──────────────────────────────────────
+parsed_output*.json
+inspect_*.txt
+page*_words.txt
+
+# ── Scratch / temp scripts ────────────────────────────────────────────────────
+scratch/
+
+# ── AI Studio metadata ────────────────────────────────────────────────────────
+metadata.json
+
+# ── PDF source files (large binary assets) ────────────────────────────────────
+*.pdf
