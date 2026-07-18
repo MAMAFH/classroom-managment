@@ -583,6 +583,8 @@ export default function Rooms({
                                      />
                                    </th>
                                    <th className="p-3">تاريخ الحجز</th>
+                                   <th className="p-3">رمز المادة</th>
+                                   <th className="p-3">عضو هيئة التدريس</th>
                                    <th className="p-3 text-center">الوقت</th>
                                    <th className="p-3 text-center w-16">إجراء</th>
                                  </tr>
@@ -605,6 +607,8 @@ export default function Rooms({
                                        />
                                      </td>
                                      <td className="p-3 font-mono">{b.date}</td>
+                                     <td className="p-3 font-bold text-white">{b.courseCode || 'بدون رمز'}</td>
+                                     <td className="p-3 text-gray-300">{b.professor || '-'}</td>
                                      <td className="p-3 text-center font-mono">{formatTime12Hour(b.startTime)} - {formatTime12Hour(b.endTime)}</td>
                                      <td className="p-3 text-center">
                                        <div className="flex items-center justify-center gap-1">
