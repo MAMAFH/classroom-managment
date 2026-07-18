@@ -548,14 +548,6 @@ export default function Rooms({
                          </button>
                        </div>
                        
-                       <button
-                         type="button"
-                         onClick={() => setShowClearConfirm(true)}
-                         className="px-4 py-2 bg-gradient-to-l from-red-600 to-amber-700 hover:from-red-500 hover:to-amber-600 text-white text-xs font-bold rounded-xl transition-all shadow-[0_4px_15px_rgba(220,38,38,0.2)] flex items-center justify-center gap-1.5"
-                       >
-                         <Trash2 size={14} />
-                         مسح جدول القاعة بالكامل
-                       </button>
                      </div>
 
                      {/* Lists of manual bookings and recurring schedules */}
@@ -677,7 +669,6 @@ export default function Rooms({
                                    <th className="p-3">رمز المادة</th>
                                    <th className="p-3">عضو هيئة التدريس</th>
                                    <th className="p-3 text-center">الوقت</th>
-                                   <th className="p-3 text-center w-16">إجراء</th>
                                  </tr>
                                </thead>
                                <tbody className="divide-y divide-white/5">
@@ -701,18 +692,6 @@ export default function Rooms({
                                       <td className="p-3 font-bold text-white">{fs.courseCode || 'بدون رمز'}</td>
                                       <td className="p-3 text-gray-300">{fs.professor || '-'}</td>
                                       <td className="p-3 text-center font-mono">{formatTime12Hour(fs.startTime)} - {formatTime12Hour(fs.endTime)}</td>
-                                     <td className="p-3 text-center">
-                                       <button
-                                         type="button"
-                                         onClick={() => {
-                                           onDeleteFixedSchedules([fs.id]);
-                                           setSelectedFixed(selectedFixed.filter(id => id !== fs.id));
-                                         }}
-                                         className="p-1.5 text-red-400 hover:text-red-500 rounded hover:bg-white/5"
-                                       >
-                                         <Trash2 size={14} />
-                                       </button>
-                                     </td>
                                    </tr>
                                  ))}
                                </tbody>
