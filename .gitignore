@@ -52,3 +52,7 @@ metadata.json
 
 # ── PDF source files (large binary assets) ────────────────────────────────────
 *.pdf
+
+# ── Firebase service account key files (contain private keys — NEVER commit) ──
+classroom-managment*.json
+*-firebase-adminsdk-*.json

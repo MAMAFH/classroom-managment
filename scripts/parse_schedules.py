@@ -141,9 +141,9 @@ def parse_days_field(field):
     day_names_sorted = sorted(WEEKDAY_MAP_RAW.keys(), key=len, reverse=True)
     day_alt = "|".join(re.escape(d) for d in day_names_sorted)
 
-    # Split the field into clauses at each day-name boundary
-    # so "...الخميس: 8:30 - 8:30 مساءً" becomes its own segment
-    segments = re.split(r"(?=(?:" + day_alt + r"))", field)
+    # Split the field into clauses at each day-name boundary,
+    # ignoring day names that are part of a range (preceded by "إلى" / "to")
+    segments = re.split(r"(?<!إلى\s)(?<!إلى)(?=(?:" + day_alt + r"))", field)
     segments = [s.strip() for s in segments if s.strip()]
 
     for seg in segments:
@@ -257,11 +257,31 @@ def init_firebase():
         return fb_firestore.client()
 
     # Priority 1: JSON key file in project root
+    # Try all matching files and use the first one that loads successfully
     json_files = sorted(PROJECT_ROOT.glob("classroom-managment*.json"))
-    if json_files:
-        cred = credentials.Certificate(str(json_files[0]))
-        print(f"   Service account: {json_files[0].name}")
+    for key_file in json_files:
+        try:
+            with open(key_file, "r", encoding="utf-8") as f:
+                service_account = json.load(f)
+            # Normalise private_key newlines (no-op if already real newlines)
+            if "private_key" in service_account and "\\n" in service_account["private_key"]:
+                service_account["private_key"] = (
+                    service_account["private_key"]
+                    .replace("\\n", "\n")
+                    .replace("\\r", "\r")
+                )
+            cred = credentials.Certificate(service_account)
+            print(f"   Service account: {key_file.name}")
+            break  # success
+        except Exception as e:
+            print(f"   Skipping {key_file.name}: {e}")
+            cred = None  # type: ignore
+            continue
     else:
+        # All JSON files failed (or none found) — fall back to env var
+        cred = None  # type: ignore
+
+    if cred is None:
         raw = os.environ.get("FIREBASE_SERVICE_ACCOUNT", "")
         if not raw:
             raise RuntimeError(
@@ -269,7 +289,21 @@ def init_firebase():
                 "Place the JSON key file in the project root or set "
                 "FIREBASE_SERVICE_ACCOUNT in .env.local"
             )
-        cred = credentials.Certificate(json.loads(raw.replace("\\\\n", "\n").replace("\\n", "\n")))
+        try:
+            service_account = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                "The FIREBASE_SERVICE_ACCOUNT value is not valid JSON."
+            ) from exc
+
+        if "private_key" in service_account:
+            service_account["private_key"] = (
+                service_account["private_key"]
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+            )
+
+        cred = credentials.Certificate(service_account)
         print("   Service account: from FIREBASE_SERVICE_ACCOUNT env var")
 
     firebase_admin.initialize_app(cred)
