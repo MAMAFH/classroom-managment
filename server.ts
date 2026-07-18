@@ -28,20 +28,28 @@ try {
   // Priority 1: look for the service account JSON file in the project root
   const jsonFiles = fs.readdirSync(__dirname).filter(
     f => f.startsWith('classroom-managment') && f.endsWith('.json')
-  );
+  ).sort(); // sort so we pick consistently; last = newest by name
   if (jsonFiles.length > 0) {
-    const filePath = path.join(__dirname, jsonFiles[0]);
+    // Pick the last file (newest key, revoked keys appear first alphabetically)
+    const latest = jsonFiles[jsonFiles.length - 1];
+    const filePath = path.join(__dirname, latest);
     serviceAccountObj = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    console.log(`📄 Loaded Firebase service account from file: ${jsonFiles[0]}`);
+    console.log(`📄 Loaded Firebase service account from file: ${latest}`);
   }
 
-  // Priority 2: fallback to env var (fix double-escaped newlines if present)
+  // Priority 2: fallback to env var
+  // The private_key in the JSON stored in .env.local has \\n (double-escaped by dotenv on Windows).
+  // Strategy: JSON.parse the raw string first (\\n is valid JSON for literal backslash-n),
+  // THEN replace \n with real newlines inside the private_key field only.
   if (!serviceAccountObj) {
     const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
     if (serviceAccountRaw) {
-      // dotenv on Windows may double-escape the newlines in the private key (\\n → \n)
-      const fixed = serviceAccountRaw.replace(/\\n/g, '\n');
-      serviceAccountObj = JSON.parse(fixed);
+      const parsed = JSON.parse(serviceAccountRaw) as any;
+      if (parsed.private_key && typeof parsed.private_key === 'string') {
+        // Convert literal \n sequences inside the key to real newline characters
+        parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+      }
+      serviceAccountObj = parsed;
     }
   }
 
